@@ -1,5 +1,7 @@
 # osx-locker
 
+![OSX Locker Demonstration](https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExMGNkMDA5ZWJiY2QzY2Y4NTg1YmY2YTEzYTU0MjM3MjkzYTkzYmY2ZCZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/pFKldo8me3jZK9uIpC/giphy.gif)
+
 This utility changes password of your current osx user to a random word and notifies you of the new password automatically on the next working day. You will not have access to the newly set password until next working day arrives. 
 
 Usual server and client architecture is being used to code this utility.
