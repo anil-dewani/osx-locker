@@ -5,6 +5,7 @@
 osx_username="{YOUR_SYSTEM_USERNAME}"
 master_password="{YOUR_MASTER_PASSWORD}"
 endpoint_domain="{YOUR_SERVER_ENDPOINT}"
+last_event="shutdown" # can pass any one of two values: "shutdown" or "sleep"
 
 # Do Not Change anything below unless needed
 
@@ -37,13 +38,13 @@ new_password="${password_array[1]}"
 
 if [ ! -n "$old_password" ]; then
   echo "No Old Password Detected. Exiting."
-  osascript -e 'Some problem with old password detection. Please continue to use your old password of your system or debug your server. buttons {"Ok"} default button 1 with title "End of Day"'
+  osascript -e 'display dialog "Some problem with old password detection. Please continue to use your old password of your system or debug your server." buttons {"Ok"} default button 1 with title "End of Day"'
   exit 0
 fi
 
 if [ ! -n "$new_password" ]; then
   echo "No New Password Detected. Exiting."
-  osascript -e 'Some problem with new password detection. Please continue to use your old password of your system or debug your server. buttons {"Ok"} default button 1 with title "End of Day"'
+  osascript -e 'display dialog "Some problem with new password detection. Please continue to use your old password of your system or debug your server." buttons {"Ok"} default button 1 with title "End of Day"'
   exit 0
 fi
 
@@ -56,7 +57,14 @@ if [ $? -eq 0 ]; then
     http_code=$(tail -n1 <<< "$verification_response")
 
     if [[ $http_code == 200  ]] ; then
-        osascript -e 'tell application "System Events" to keystroke "q" using {control down, command down}'
+        if [[ $last_event == "shutdown" ]] ; then
+          osascript -e 'tell app "System Events" to shut down'
+        elif [[ $last_event == "sleep" ]] ; then
+          osascript -e 'tell application "System Events" to keystroke "q" using {control down, command down}'
+        else
+          echo "Incorrect or no value passed in last_event config variable"
+          osascript -e 'display dialog "Incorrect or no value passed in last_event config variable" buttons {"Ok"} default button 1 with title "End of Day"'
+        fi
     else
         echo "Some problem with password verification. Setting password to your master password."
         dscl . -passwd /Users/$osx_username $new_password $master_password
