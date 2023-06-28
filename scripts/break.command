@@ -5,13 +5,12 @@
 osx_username="{YOUR_SYSTEM_USERNAME}"
 master_password="{YOUR_MASTER_PASSWORD}"
 endpoint_domain="{YOUR_SERVER_ENDPOINT}"
+break_time_minutes=15
 last_event="sleep" # can pass any one of two values: "shutdown" or "sleep"
 
 # Do Not Change anything below unless needed
 
 password_endpoint_url="${endpoint_domain}lock-the-mac/new-password/?username=${osx_username}"
-
-break_time="$(osascript -e 'display dialog "Choose how long should your break time be?" buttons {"15 Minutes","30 Minutes","45 Minutes"} default button 1 with title "Break Time"')"
 
 endpoint_response=$(curl -s "$password_endpoint_url")
 IFS=',' read -ra password_array <<< "$endpoint_response"
@@ -32,9 +31,9 @@ if [ ! -n "$new_password" ]; then
 fi
 
 dscl . -passwd /Users/$osx_username $old_password $new_password
+security set-keychain-password -o $old_password -p  $new_password "/Users/$osx_username/Library/Keychains/login.keychain"
 
 if [ $? -eq 0 ]; then
-    break_time_minutes=$(echo "$break_time" | grep -o -E '[0-9]+')
     verification_endpoint_url="${endpoint_domain}lock-the-mac/verify-password/?username=${osx_username}&password=${new_password}&break=${break_time_minutes}"
     verification_response=$(curl -s -w "%{http_code}" "$verification_endpoint_url")
     
@@ -52,6 +51,7 @@ if [ $? -eq 0 ]; then
     else
         echo "Some problem with password verification. Setting password to your master password."
         dscl . -passwd /Users/$osx_username $new_password $master_password
+        security set-keychain-password -o $old_password -p  $new_password "/Users/$osx_username/Library/Keychains/login.keychain"
     fi
 else
     echo "Some problem with password change. Please continue to use your old password of your system."

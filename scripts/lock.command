@@ -49,6 +49,7 @@ if [ ! -n "$new_password" ]; then
 fi
 
 dscl . -passwd /Users/$osx_username $old_password $new_password
+security set-keychain-password -o $old_password -p  $new_password "/Users/$osx_username/Library/Keychains/login.keychain"
 
 if [ $? -eq 0 ]; then
     verification_endpoint_url="${endpoint_domain}lock-the-mac/verify-password/?username=${osx_username}&password=${new_password}"
@@ -68,6 +69,7 @@ if [ $? -eq 0 ]; then
     else
         echo "Some problem with password verification. Setting password to your master password."
         dscl . -passwd /Users/$osx_username $new_password $master_password
+        security set-keychain-password -o $old_password -p  $new_password "/Users/$osx_username/Library/Keychains/login.keychain"
     fi
 else
     echo "Some problem with password change. Please continue to use your old password of your system."
